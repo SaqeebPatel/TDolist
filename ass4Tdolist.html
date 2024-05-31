@@ -1,0 +1,136 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Title</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <style>
+      body {
+        background: linear-gradient(to right, #7aff5f, #fe7b7b);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .task-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+      }
+      .task-item button {
+        margin-left: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="text-center">To-Do List</h2>
+      <input type="text" id="taskInput" class="form-control" placeholder="Add a new task">
+      <button type="button" class="btn btn-success mt-2" onclick="addTask()">Add Task</button>
+      <ul id="taskList" class="task-list mt-3" ondrop="drop(event)" ondragover="allowDrop(event)"></ul>
+    </div>
+    
+    <script>
+      let tasks = [];
+    
+      function addTask() {
+        const taskInput = document.getElementById('taskInput');
+        const taskName = taskInput.value.trim();
+        if (taskName !== '') {
+          const taskId = Date.now().toString();
+          const task = { id: taskId, name: taskName };
+          tasks.push(task);
+          displayTasks();
+          taskInput.value = '';
+        }
+      }
+    
+      function deleteTask(taskId) {
+        tasks = tasks.filter(task => task.id !== taskId);
+        displayTasks();
+      }
+    
+      function editTask(taskId, newName) {
+        tasks = tasks.map(task => {
+          if (task.id === taskId) {
+            return { ...task, name: newName };
+          }
+          return task;
+        });
+        displayTasks();
+      }
+    
+      function allowDrop(event) {
+        event.preventDefault();
+      }
+    
+      function drag(event, taskId) {
+        event.dataTransfer.setData('taskId', taskId);
+      }
+    
+      function drop(event) {
+        event.preventDefault();
+        const taskId = event.dataTransfer.getData('taskId');
+        const taskIndex = tasks.findIndex(task => task.id === taskId);
+        if (taskIndex !== -1) {
+          const task = tasks.splice(taskIndex, 1)[0];
+          tasks.splice(event.target.dataset.index, 0, task);
+          displayTasks();
+        }
+      }
+    
+      function displayTasks() {
+        const taskList = document.getElementById('taskList');
+        taskList.innerHTML = '';
+        tasks.forEach((task, index) => {
+          const li = document.createElement('li');
+          li.className = 'task-item';
+          li.draggable = true;
+          li.dataset.index = index;
+          li.setAttribute('ondragstart', `drag(event, '${task.id}')`);
+          li.textContent = task.name;
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn btn-danger btn-sm';
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.onclick = () => deleteTask(task.id);
+          const editBtn = document.createElement('button');
+          editBtn.className = 'btn btn-warning btn-sm';
+          editBtn.textContent = 'Edit';
+          editBtn.onclick = () => {
+            const newName = prompt('Enter new task name:', task.name);
+            if (newName !== null) {
+              editTask(task.id, newName.trim());
+            }
+          };
+          li.appendChild(deleteBtn);
+          li.appendChild(editBtn);
+          taskList.appendChild(li);
+        });
+      }
+    
+      displayTasks();
+    </script>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  </body>
+</html>
